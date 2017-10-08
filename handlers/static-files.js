@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const responses = require('../common/responses');
 
 function getContentType(url) {
 
@@ -30,18 +31,15 @@ module.exports = (req, resp) => {
         fs.readFile(filePath, (err, data) => {
 
             if (err) {
-                resp.writeHead(404, {
-                    'Content-Type': 'text/plain'
-                });
+                console.log(err);
 
-                resp.write('Resource not found!');
+                responses.notFound(resp);
                 resp.end();
                 return;
             }
 
-            resp.writeHead(200, {
-                'Content-Type': getContentType(req.pathname)
-            });
+            let contentType = getContentType(req.pathname);
+            responses.ok(resp, contentType);
 
             resp.write(data);
             resp.end();

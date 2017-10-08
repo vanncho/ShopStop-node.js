@@ -2,9 +2,10 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const multiparty = require('multiparty');
-const shortid = require('shortid');
+const shortId = require('shortid');
 const Product = require('../models/product');
 const Category = require('../models/category');
+const responses = require('../common/responses');
 
 module.exports = (req, resp) => {
 
@@ -34,9 +35,7 @@ module.exports = (req, resp) => {
 
                 let html = data.toString().replace('{categories}', replacement);
 
-                resp.writeHead(200, {
-                    'Content-Type': 'text/html'
-                });
+                responses.ok(resp);
 
                 resp.write(html);
                 resp.end();
@@ -54,7 +53,7 @@ module.exports = (req, resp) => {
             productFromForm.price = fields.price[0];
             productFromForm.category = fields.category[0];
 
-            let fileName = shortid.generate();
+            let fileName = shortId.generate();
             let filePath = path.normalize(path.join(__dirname, `../content/images/${fileName}`));
             productFromForm.image = `../content/images/${fileName}.${(files.image[0].path).substr(-3)}`;
 
@@ -81,10 +80,8 @@ module.exports = (req, resp) => {
                    category.save();
 
                 });
-                
-                resp.writeHead(302, {
-                    Location: '/'
-                });
+
+                responses.redirect(resp);
 
                 resp.end();
 

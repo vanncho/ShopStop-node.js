@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const qs = require('querystring');
 const Product = require('../models/product');
+const responses = require('../common/responses');
 
 module.exports = (req, resp) => {
 
@@ -16,18 +17,13 @@ module.exports = (req, resp) => {
 
             if (err) {
                 console.log(err);
-                resp.writeHead(404, {
-                    'Content-Type': 'text/html'
-                });
 
-                resp.write('404 Not Found!');
+                responses.notFound(resp);
                 resp.end();
                 return;
             }
 
-            resp.writeHead(200, {
-                'Content-Type': 'text/html'
-            });
+            responses.ok(resp);
 
             let queryData = qs.parse(url.parse(req.url).query);
 
@@ -53,7 +49,7 @@ module.exports = (req, resp) => {
                 resp.write(html);
                 resp.end();
 
-            }). catch(console.log());
+            }). catch(console.log);
 
         });
     } else {

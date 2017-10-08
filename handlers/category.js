@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const qs = require('querystring');
 const Category = require('../models/category');
+const responses = require('../common/responses');
 
 module.exports = (req, resp) => {
 
@@ -19,9 +20,7 @@ module.exports = (req, resp) => {
                return;
            }
 
-           resp.writeHead(200, {
-               'Content-Type': 'text/html'
-           });
+           responses.ok(resp);
 
            resp.write(data);
            resp.end();
@@ -40,9 +39,7 @@ module.exports = (req, resp) => {
             let category = qs.parse(queryData);
             Category.create(category).then(() => {
 
-                resp.writeHead(302, {
-                    Location: '/'
-                });
+                responses.redirect(resp);
 
                 resp.end();
             }).catch(console.log());
