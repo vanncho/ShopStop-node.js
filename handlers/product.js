@@ -1,9 +1,10 @@
 const url = require('url');
-const database = require('../config/database');
 const fs = require('fs');
 const path = require('path');
 const multiparty = require('multiparty');
 const shortid = require('shortid');
+const Product = require('../models/product');
+const Category = require('../models/category');
 
 module.exports = (req, resp) => {
 
@@ -19,27 +20,43 @@ module.exports = (req, resp) => {
                 console.log(err);
             }
 
-            resp.writeHead(200, {
-                'Content-Type': 'text/html'
-            });
+            Category.find().then((categories) => {
 
-            resp.write(data);
-            resp.end();
+                let replacement = '<select class="input-field" name="category">';
+                replacement += '<option></option>';
+
+                for (let category of categories) {
+
+                    replacement += `<option value="${category._id}">${category.name}</option>`;
+                }
+
+                replacement += '</select>';
+
+                let html = data.toString().replace('{categories}', replacement);
+
+                resp.writeHead(200, {
+                    'Content-Type': 'text/html'
+                });
+
+                resp.write(html);
+                resp.end();
+            });
         });
     } else if (req.pathname === '/product/add' && req.method === 'POST') {
 
         let form = new multiparty.Form();
-        let product = {};
+        let productFromForm = {};
 
-        form.parse(req, function(err, fields, files) {
+        form.parse(req, function (err, fields, files) {
 
-            product.name = fields.name[0];
-            product.description = fields.description[0];
-            product.price = fields.price[0];
+            productFromForm.name = fields.name[0];
+            productFromForm.description = fields.description[0];
+            productFromForm.price = fields.price[0];
+            productFromForm.category = fields.category[0];
 
             let fileName = shortid.generate();
             let filePath = path.normalize(path.join(__dirname, `../content/images/${fileName}`));
-            product.image = `../content/images/${fileName}.${(files.image[0].path).substr(-3)}`;
+            productFromForm.image = `../content/images/${fileName}.${(files.image[0].path).substr(-3)}`;
 
             fs.readFile(files.image[0].path, (err, data) => {
 
@@ -56,13 +73,23 @@ module.exports = (req, resp) => {
                 });
             });
 
-            database.products.add(product);
+            Product.create(productFromForm).then((insertedProduct) => {
 
-            resp.writeHead(302, {
-                        Location: '/'
-                    });
+                Category.findById(productFromForm.category).then(category => {
 
-            resp.end();
+                   category.products.push(insertedProduct._id);
+                   category.save();
+
+                });
+                
+                resp.writeHead(302, {
+                    Location: '/'
+                });
+
+                resp.end();
+
+            }).catch(console.log);
+
         });
     } else {
         return true;

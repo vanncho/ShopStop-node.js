@@ -4,15 +4,19 @@ const url = require('url');
 
 function getContentType(url) {
 
-    if (url.endsWith('.css')) {
-        return 'text/css';
-    } else if (url.endsWith('.js')) {
-        return 'application/javascript';
-    } else if (url.endsWith('.ico')) {
-        return 'image/x-icon';
-    } else if (url.endsWith('.png')) {
-        return 'image/png';
-    }
+    let lastDotIndex = url.lastIndexOf('.');
+    url = url.substring(lastDotIndex);
+
+    let contentTypes = {
+        ".css": "text/css",
+        ".js": "application/javascript",
+        ".ico": "image/x-icon",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg"
+    };
+
+    return contentTypes[url];
 }
 
 module.exports = (req, resp) => {
