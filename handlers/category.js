@@ -1,50 +1,31 @@
-const url = require('url');
-const fs = require('fs');
-const path = require('path');
-const qs = require('querystring');
 const Category = require('../models/category');
-const responses = require('../common/responses');
 
-module.exports = (req, resp) => {
+module.exports.addGet = (req, resp) => {
 
-    req.pathname = req.pathname || url.parse(req.parse).pathname;
+    resp.render('category/add');
+};
 
-    if (req.pathname === '/category/add' && req.method === 'GET') {
+module.exports.addPost = (req, resp) => {
 
-        let filePath = path.normalize(path.join(__dirname, '../views/category/add.html'));
+    let category = req.body;
 
-        fs.readFile(filePath, (err, data) => {
+    Category.create(category).then(() => {
 
-           if (err) {
-               console.log(err);
-               return;
-           }
+        resp.redirect('/');
+    });
+};
 
-           responses.ok(resp);
+module.exports.productByCategory = (req, resp) => {
 
-           resp.write(data);
-           resp.end();
-        });
-    } else if (req.pathname === '/category/add' && req.method === 'POST') {
+    let categoryName = req.params.category;
 
-        let queryData = '';
+    Category.findOne({name: categoryName}).populate('products').then((category) => {
 
-        req.on('data', (data) => {
+        if (!category) {
+            resp.sendStatus(404);
+            return;
+        }
 
-           queryData += data;
-        });
-
-        req.on('end', () => {
-
-            let category = qs.parse(queryData);
-            Category.create(category).then(() => {
-
-                responses.redirect(resp);
-
-                resp.end();
-            }).catch(console.log());
-        });
-    } else {
-        return true;
-    }
+        resp.render('category/products', {category: category});
+    });
 };
