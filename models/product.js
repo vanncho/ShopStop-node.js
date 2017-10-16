@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 let productSchema = mongoose.Schema({
+
     name: {type: mongoose.Schema.Types.String, required: true},
-    description: {type: mongoose.Schema.Types.String},
+    description: {type: mongoose.Schema.Types.String, required: true},
     price: {
         type: mongoose.Schema.Types.Number,
         min: 0,
@@ -10,8 +11,9 @@ let productSchema = mongoose.Schema({
         default: 0
     },
     image: {type: mongoose.Schema.Types.String},
-    category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category'},
-    isBought: {type: mongoose.Schema.Types.Boolean, default: false}
+    creator: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    buyer: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+    category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true}
 });
 
 let Product = mongoose.model('Product', productSchema);

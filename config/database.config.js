@@ -3,7 +3,9 @@ mongoose.Promise = global.Promise;
 
 module.exports = (config) => {
 
-    mongoose.connect(config.connectionString);
+    mongoose.connect(config.connectionString, {
+        useMongoClient: true
+    });
 
     let database = mongoose.connection;
 
@@ -22,9 +24,10 @@ module.exports = (config) => {
            return;
        }
 
-        console.log('Connected!');
+        console.log('Connected to database!');
     });
 
     require('../models/product');
     require('../models/category');
+    require('../models/user').seedAdminUser();
 };

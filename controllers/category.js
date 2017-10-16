@@ -8,6 +8,7 @@ module.exports.addGet = (req, resp) => {
 module.exports.addPost = (req, resp) => {
 
     let category = req.body;
+    category.creator = req.user._id;
 
     Category.create(category).then(() => {
 
